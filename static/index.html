@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DSA Arena</title>
+    <style>
+        /* Base CP Platform Styling */
+        body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f3f3; color: #333; }
+        
+        /* Navigation Bar */
+        .navbar { background-color: #ffffff; border-bottom: 2px solid #e0e0e0; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .navbar h1 { margin: 0; font-size: 20px; color: #3b5998; font-weight: bold; }
+        .nav-links a { margin-left: 20px; text-decoration: none; color: #555; font-weight: bold; font-size: 14px; }
+        .nav-links a:hover { color: #3b5998; }
+
+        /* Main Container Layout */
+        .container { max-width: 1100px; margin: 20px auto; display: flex; gap: 20px; padding: 0 10px; }
+        
+        /* Sidebar (Match Settings) */
+        .sidebar { flex: 1; background: white; padding: 20px; border-radius: 5px; border: 1px solid #e0e0e0; box-shadow: 0 1px 2px rgba(0,0,0,0.05); height: fit-content; }
+        .sidebar h3 { margin-top: 0; font-size: 16px; border-bottom: 1px solid #e0e0e0; padding-bottom: 10px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 13px; font-weight: bold; margin-bottom: 5px; color: #555; }
+        .form-group input, .form-group select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        .btn-primary { width: 100%; padding: 10px; background-color: #3b5998; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; }
+        .btn-primary:hover { background-color: #2d4373; }
+        
+        /* Main Content Area (Active Match) */
+        .main-content { flex: 3; background: white; padding: 20px; border-radius: 5px; border: 1px solid #e0e0e0; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .main-content h2 { margin-top: 0; font-size: 18px; color: #333; }
+        
+        /* Data Tables (CP-31 Style) */
+        .cp-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .cp-table th, .cp-table td { border: 1px solid #e0e0e0; padding: 12px; text-align: left; font-size: 14px; }
+        .cp-table th { background-color: #f8f9fa; font-weight: bold; color: #555; }
+        .cp-table tr:nth-child(even) { background-color: #fbfbfb; }
+        
+        /* Actions */
+        .btn-success { background-color: #4CAF50; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn-danger { background-color: #e74c3c; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn-success:hover { background-color: #45a049; }
+        .btn-danger:hover { background-color: #c0392b; }
+        .problem-link { color: #3b5998; text-decoration: none; font-weight: bold; font-family: monospace; font-size: 15px; }
+        .problem-link:hover { text-decoration: underline; }
+
+        /* Codeforces Rating Colors */
+        .rating-gray { color: #808080; font-weight: bold; }
+        .rating-green { color: #008000; font-weight: bold; }
+        .rating-cyan { color: #03a89e; font-weight: bold; }
+        .rating-blue { color: #0000ff; font-weight: bold; }
+        .rating-purple { color: #aa00aa; font-weight: bold; }
+        .rating-orange { color: #ff8c00; font-weight: bold; }
+        .rating-red { color: #ff0000; font-weight: bold; }
+
+        /* Hide elements initially */
+        #matchArea, #resultArea { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <h1>DSA ARENA</h1>
+        <div class="nav-links">
+            <a href="#">Home</a>
+            <a href="#">Contests</a>
+            <a href="#">Rating</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="sidebar">
+            <h3>Matchmaking</h3>
+            <div class="form-group">
+                <label>User ID</label>
+                <input type="number" id="userId" placeholder="Enter ID (e.g., 1)" value="1">
+            </div>
+            <div class="form-group">
+                <label>Match Mode</label>
+                <select id="mode">
+                    <option value="focus">Focus (Expected Time)</option>
+                    <option value="chill">Chill (1.5x Time)</option>
+                </select>
+            </div>
+            <button class="btn-primary" onclick="startMatch()">Start Match</button>
+            <p id="statusMessage" style="font-size: 12px; margin-top: 10px; color: #e74c3c;"></p>
+        </div>
+
+        <div class="main-content">
+            
+            <div id="welcomeArea">
+                <h2>Welcome to the Arena</h2>
+                <p style="color: #666; font-size: 14px;">Select your user ID and mode on the left to request a dynamically balanced problem from the Codeforces database.</p>
+            </div>
+
+            <div id="matchArea">
+                <h2 style="color: #e74c3c;">🔴 Live Match</h2>
+                <table class="cp-table">
+                    <tr>
+                        <th style="width: 20%;">Problem</th>
+                        <td><a id="ui-prob-link" class="problem-link" href="#" target="_blank">Loading...</a></td>
+                    </tr>
+                    <tr>
+                        <th>Difficulty</th>
+                        <td id="ui-diff">--</td>
+                    </tr>
+                    <tr>
+                        <th>Time Limit</th>
+                        <td id="ui-time" style="font-weight: bold; color: #e74c3c;">-- minutes</td>
+                    </tr>
+                </table>
+                <br>
+                <button class="btn-success" onclick="finishMatch(true)">✔ Accepted (Solved)</button>
+                <button class="btn-danger" style="margin-left: 10px;" onclick="finishMatch(false)">✖ Gave Up</button>
+                <p id="matchStatus" style="font-size: 13px; margin-top: 15px; color: #555;"></p>
+            </div>
+
+            <div id="resultArea">
+                <h2>Match Results</h2>
+                <table class="cp-table">
+                    <tr>
+                        <th style="width: 20%;">Verdict</th>
+                        <td id="res-verdict" style="font-weight: bold;">--</td>
+                    </tr>
+                    <tr>
+                        <th>Time Taken</th>
+                        <td id="res-time">--</td>
+                    </tr>
+                    <tr>
+                        <th>Rating Change</th>
+                        <td id="res-delta">--</td>
+                    </tr>
+                    <tr>
+                        <th>New Rating</th>
+                        <td id="res-new" style="font-size: 18px;">--</td>
+                    </tr>
+                </table>
+                <br>
+                <button class="btn-primary" style="width: auto;" onclick="location.reload()">Return to Matchmaking</button>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        let currentMatchId = null;
+
+        // Helper function to apply Codeforces colors based on rating
+        function getRatingColorClass(rating) {
+            if (rating < 1200) return 'rating-gray';
+            if (rating < 1400) return 'rating-green';
+            if (rating < 1600) return 'rating-cyan';
+            if (rating < 1900) return 'rating-blue';
+            if (rating < 2100) return 'rating-purple';
+            if (rating < 2400) return 'rating-orange';
+            return 'rating-red';
+        }
+
+        async function startMatch() {
+            const userId = document.getElementById("userId").value;
+            const mode = document.getElementById("mode").value;
+            const statusText = document.getElementById("statusMessage");
+
+            if (!userId) { statusText.innerText = "Error: User ID required."; return; }
+            statusText.innerText = "Requesting problem from server...";
+
+            try {
+                const response = await fetch(`http://localhost:8000/start-match?user_id=${userId}&mode=${mode}`, { method: 'POST' });
+                const data = await response.json();
+
+                if (response.ok) {
+                    currentMatchId = data.match_id;
+                    
+                    // Hide welcome, show match
+                    document.getElementById("welcomeArea").style.display = "none";
+                    document.getElementById("matchArea").style.display = "block";
+                    statusText.innerText = "";
+                    
+                    // Populate match data
+                    const linkEl = document.getElementById("ui-prob-link");
+                    linkEl.innerText = data.problem_name;
+                    linkEl.href = data.codeforces_url;
+                    
+                    const diffEl = document.getElementById("ui-diff");
+                    diffEl.innerText = data.difficulty;
+                    diffEl.className = getRatingColorClass(data.difficulty);
+                    
+                    document.getElementById("ui-time").innerText = `${data.time_limit_minutes} mins`;
+
+                } else {
+                    statusText.innerText = `Error: ${data.detail}`;
+                }
+            } catch (error) {
+                statusText.innerText = "Server connection failed.";
+            }
+        }
+
+        async function finishMatch(success) {
+            document.getElementById("matchStatus").innerText = "Evaluating submission and calculating Elo delta...";
+
+            try {
+                const response = await fetch(`http://localhost:8000/submit?match_id=${currentMatchId}&completed_successfully=${success}`, { method: 'POST' });
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Hide match, show results
+                    document.getElementById("matchArea").style.display = "none";
+                    document.getElementById("resultArea").style.display = "block";
+                    
+                    // Populate results data
+                    const verdictEl = document.getElementById("res-verdict");
+                    verdictEl.innerText = data.verdict;
+                    verdictEl.style.color = data.verdict === "Accepted" ? "#008000" : "#e74c3c";
+                    
+                    document.getElementById("res-time").innerText = `${data.time_taken_minutes} mins`;
+                    
+                    const deltaEl = document.getElementById("res-delta");
+                    const sign = data.rating_change >= 0 ? "+" : "";
+                    deltaEl.innerText = `${sign}${data.rating_change}`;
+                    deltaEl.style.color = data.rating_change >= 0 ? "#008000" : "#e74c3c";
+                    
+                    const newRatingEl = document.getElementById("res-new");
+                    newRatingEl.innerText = data.new_rating;
+                    newRatingEl.className = getRatingColorClass(data.new_rating);
+
+                } else {
+                    document.getElementById("matchStatus").innerText = `Error: ${data.detail}`;
+                }
+            } catch (error) {
+                document.getElementById("matchStatus").innerText = "Failed to submit result.";
+            }
+        }
+    </script>
+</body>
+</html>
