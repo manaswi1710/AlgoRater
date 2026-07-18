@@ -1,0 +1,165 @@
+body { 
+    margin: 0; 
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, sans-serif; 
+    background-color: #f0f2f5; 
+    color: #202124; 
+    font-size: 16px; 
+}
+
+.navbar { 
+    background-color: #ffffff; 
+    border-bottom: 1px solid #e0e0e0; 
+    padding: 15px 40px; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    box-shadow: 0 2px 4px rgba(0,0,0,0.06); 
+}
+.navbar h1 { 
+    margin: 0; 
+    font-size: 26px; 
+    color: #1a73e8; 
+    font-weight: 800; 
+    letter-spacing: 1px; 
+}
+.nav-links a { 
+    margin-left: 30px; 
+    text-decoration: none; 
+    color: #5f6368; 
+    font-weight: 600; 
+    font-size: 16px; 
+    transition: color 0.2s ease-in-out; 
+}
+.nav-links a:hover { color: #1a73e8; }
+
+.container { 
+    max-width: 1400px; 
+    margin: 40px auto; 
+    display: flex; 
+    gap: 30px; 
+    padding: 0 20px; 
+}
+
+.sidebar { 
+    flex: 1; 
+    min-width: 320px; 
+    background: white; 
+    padding: 30px; 
+    border-radius: 12px; 
+    border: 1px solid #eaebed; 
+    box-shadow: 0 4px 6px rgba(0,0,0,0.04); 
+    height: fit-content; 
+}
+.sidebar h3 { 
+    margin-top: 0; 
+    font-size: 20px; 
+    border-bottom: 2px solid #f0f2f5; 
+    padding-bottom: 15px; 
+    margin-bottom: 25px; 
+    color: #202124; 
+}
+.form-group { margin-bottom: 20px; }
+.form-group label { 
+    display: block; 
+    font-size: 15px; 
+    font-weight: 600; 
+    margin-bottom: 8px; 
+    color: #5f6368; 
+}
+.form-group input, .form-group select { 
+    width: 100%; 
+    padding: 12px 15px; 
+    border: 2px solid #dadce0; 
+    border-radius: 8px; 
+    box-sizing: border-box; 
+    font-size: 16px; 
+    background-color: #fafafa;
+    transition: all 0.2s;
+}
+.form-group input:focus, .form-group select:focus {
+    border-color: #1a73e8;
+    background-color: #ffffff;
+    outline: none;
+}
+.btn-primary { 
+    width: 100%; 
+    padding: 14px; 
+    background-color: #1a73e8; 
+    color: white; 
+    border: none; 
+    border-radius: 8px; 
+    font-weight: bold; 
+    font-size: 16px; 
+    cursor: pointer; 
+    transition: background-color 0.2s, transform 0.1s; 
+}
+.btn-primary:hover { 
+    background-color: #1557b0; 
+    transform: translateY(-1px); 
+}
+.btn-primary:active { transform: translateY(0); }
+
+.main-content { 
+    flex: 3; 
+    background: white; 
+    padding: 35px 40px; 
+    border-radius: 12px; 
+    border: 1px solid #eaebed; 
+    box-shadow: 0 4px 6px rgba(0,0,0,0.04); 
+}
+.main-content h2 { margin-top: 0; font-size: 24px; color: #202124; margin-bottom: 15px; }
+.main-content p { font-size: 16px; color: #5f6368; line-height: 1.6; }
+
+.cp-table { 
+    width: 100%; 
+    border-collapse: collapse; 
+    margin-top: 25px; 
+}
+.cp-table th, .cp-table td { 
+    border-bottom: 1px solid #eaebed; 
+    padding: 18px 15px; 
+    text-align: left; 
+    font-size: 16px; 
+}
+.cp-table th { 
+    background-color: #f8f9fa; 
+    font-weight: 700; 
+    color: #5f6368; 
+    text-transform: uppercase; 
+    font-size: 13px; 
+    letter-spacing: 0.5px;
+}
+.cp-table tr { transition: background-color 0.15s; }
+.cp-table tr:nth-child(even) { background-color: #fcfcfc; }
+.cp-table tr:hover { background-color: #f1f3f4; } 
+
+#browserArea div {
+    max-height: 550px; 
+    overflow-y: auto;
+    border: 1px solid #eaebed;
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+.btn-success { background-color: #1e8e3e; color: white; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px; transition: 0.2s;}
+.btn-danger { background-color: #d93025; color: white; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px; transition: 0.2s;}
+.btn-success:hover { background-color: #188038; }
+.btn-danger:hover { background-color: #c5221f; }
+.problem-link { 
+    color: #1a73e8; 
+    text-decoration: none; 
+    font-weight: bold; 
+    font-family: 'Consolas', monospace; 
+    font-size: 18px; 
+}
+.problem-link:hover { text-decoration: underline; color: #1557b0; }
+
+.rating-gray { color: #808080; font-weight: 700; }
+.rating-green { color: #1e8e3e; font-weight: 700; }
+.rating-cyan { color: #03a89e; font-weight: 700; }
+.rating-blue { color: #1a73e8; font-weight: 700; }
+.rating-purple { color: #a142f4; font-weight: 700; }
+.rating-orange { color: #fa7b17; font-weight: 700; }
+.rating-red { color: #d93025; font-weight: 700; }
+
+#matchArea, #resultArea { display: none; }

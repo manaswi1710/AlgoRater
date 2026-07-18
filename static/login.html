@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DSA Arena Login</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body style="display: flex; justify-content: center; align-items: center; height: 100vh;">
+    <div class="sidebar" style="width: 350px;">
+        <h2>Login to Arena</h2>
+        <input type="text" id="username" placeholder="Username">
+        <input type="password" id="password" placeholder="Password">
+        <button class="btn-primary" onclick="login()">Sign In</button>
+    </div>
+    <script>
+        async function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const res = await fetch(`/login?username=${username}&password=${password}`, { method: 'POST' });
+            const data = await res.json();
+            if (res.ok) {
+                localStorage.setItem('userId', data.user_id);
+                window.location.href = "/play";
+            } else {
+                alert("Login failed!");
+            }
+        }
+    </script>
+</body>
+</html>
