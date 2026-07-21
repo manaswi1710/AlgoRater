@@ -4,6 +4,19 @@ let timerInterval = null;
 document.getElementById('mode').addEventListener('change', function() {
     document.getElementById('focusSettings').style.display = this.value === 'chill' ? 'none' : 'block';
 });
+document.addEventListener("DOMContentLoaded", () => {
+    loadUserProfile();
+    //   const userId = localStorage.getItem("userId");
+
+    // if(userId){
+    //     document.getElementById("userId").value = userId;
+    // }
+});
+
+function logout() {
+    localStorage.clear();
+    window.location.href = "/static/login.html";
+}
 
 function getRatingColorClass(rating) {
     if (rating < 1200) return 'rating-gray';
@@ -31,6 +44,57 @@ function getUserId() {
     }
     return storedId;
 }
+
+// async function loadUserProfile() {
+//     const userId =localStorage.getItem("userId");
+//     if (!userId) return;
+
+//     try {
+//         const res = await fetch(`/user/${userId}`);
+//         const data = await res.json();
+
+//         if (res.ok) {
+//             document.getElementById("profUsername").innerText = data.username;
+//             document.getElementById("profRating").innerText = Math.round(data.current_rating || data.rating || 1200);
+//             document.getElementById("profHandle").innerText = data.cf_handle;
+            
+//             // Set CF handle into hidden field for automated verification
+//             document.getElementById("cfHandle").value = data.cf_handle;
+//             localStorage.setItem("cfHandle", data.cf_handle);
+//         }
+//     } catch (e) {
+//         console.error("Failed to load profile", e);
+//     }
+// }
+async function loadUserProfile() {
+
+    const userId = localStorage.getItem("userId");
+
+    const res = await fetch(`/user/${userId}`);
+
+    const data = await res.json();
+
+
+    document.getElementById("profUsername").innerText = data.username;
+
+}
+
+// async function loadUser() {
+//     const userId = localStorage.getItem("userId");
+
+//     if (!userId) return;
+
+//     const res = await fetch(`/user/${userId}`);
+//     const data = await res.json();
+
+//     document.getElementById("currentUser").innerHTML = `
+//         <strong>${data.username}</strong><br>
+//         Rating: ${data.rating}<br>
+//         CF: ${data.cf_handle}
+//     `;
+// }
+
+// loadUser();
 
 async function startMatch() {
     // Automatically retrieve the ID from local storage

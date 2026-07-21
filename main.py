@@ -6,23 +6,292 @@ from datetime import datetime, timedelta
 import psycopg2
 import requests
 import random
+import os 
+import webbrowser
+from threading import Timer
 
+from datetime import datetime
+from dotenv import load_dotenv
 app = FastAPI()
+app.mount("/css", StaticFiles(directory="css"), name="css")
+app.mount("/js", StaticFiles(directory="js"), name="js")
+app.mount("/static", StaticFiles(directory="static"), name="static")
+@app.on_event("startup")
+def open_browser():
+    Timer(1, lambda: webbrowser.open("http://127.0.0.1:8000")).start()
+load_dotenv()
 
+
+@app.get("/api/leaderboard")
+def get_leaderboard():
+
+    try:
+        conn = psycopg2.connect(**DB_CONFIG)
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT username, cf_handle, current_rating, peak_rating
+            FROM users
+            ORDER BY current_rating DESC
+            LIMIT 50;
+        """)
+
+        rows = cursor.fetchall()
+
+        cursor.close()
+        conn.close()
+
+
+        leaderboard = []
+
+        rank = 1
+
+        for row in rows:
+
+            leaderboard.append({
+                "rank": rank,
+                "username": row[0],
+                "cf_handle": row[1],
+                "rating": row[2],
+                "peak": row[3]
+            })
+
+            rank += 1
+
+
+        return leaderboard
+
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=str(e)
+        )
+
+@app.get("/contests")
+def contests():
+    return FileResponse("static/contests.html")
+
+@app.get("/api/contests")
+def get_contests():
+
+    url = "https://codeforces.com/api/contest.list"
+
+    response = requests.get(url)
+    data = response.json()
+
+    if data["status"] != "OK":
+        raise HTTPException(
+            status_code=500,
+            detail="Could not fetch contests"
+        )
+
+    contests = []
+
+    for c in data["result"]:
+
+        if c["phase"] == "BEFORE":
+
+            contests.append({
+                "name": c["name"],
+                "id": c["id"],
+                "duration": c["durationSeconds"] // 3600,
+                "startTime": datetime.fromtimestamp(
+                    c["startTimeSeconds"]
+                ).strftime("%d %b %Y %H:%M")
+            })
+
+    return contests[:10]
 # Replace with your actual database credentials
 DB_CONFIG = {
-    "dbname": "dsa_tracker_db",
-    "user": "postgres",
-    "password": "Makemake29@",
-    "host": "localhost",
-    "port": "5433"
+    "dbname": os.getenv("DB_NAME"),
+    "user": os.getenv("DB_USER"),
+    "password": os.getenv("DB_PASSWORD"),
+    "host": os.getenv("DB_HOST"),
+    "port": os.getenv("DB_PORT")
 }
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
 
-@app.get("/play")
-def serve_frontend():
-    return FileResponse("static/index.html")
+
+@app.get("/user/{user_id}")
+def get_user(user_id: int):
+
+    conn = psycopg2.connect(**DB_CONFIG)
+    cursor = conn.cursor()
+
+
+    # User details
+    cursor.execute("""
+        SELECT username, current_rating, peak_rating, cf_handle
+        FROM users
+        WHERE id=%s
+    """,(user_id,))
+
+
+    user = cursor.fetchone()
+
+
+    if not user:
+        raise HTTPException(
+            status_code=404,
+            detail="User not found"
+        )
+
+
+    # Solved problems count
+    cursor.execute("""
+        SELECT COUNT(*)
+        FROM submissions
+        WHERE user_id=%s
+        AND verdict='Accepted'
+    """,(user_id,))
+
+
+    solved = cursor.fetchone()[0]
+
+
+    # Rank calculation
+    cursor.execute("""
+        SELECT COUNT(*)
+        FROM users
+        WHERE current_rating > %s
+    """,(user[1],))
+
+
+    rank = cursor.fetchone()[0] + 1
+
+
+
+    cursor.close()
+    conn.close()
+
+
+
+    return {
+
+        "username": user[0],
+
+        "rating": user[1],
+
+        "peak_rating": user[2],
+
+        "cf_handle": user[3],
+
+        "solved": solved,
+
+        "rank": rank
+
+    }
+
+@app.get("/")
+def home():
+    return FileResponse("static/login.html")
+
+
+@app.get("/arena")
+def arena_page():
+    return FileResponse("static/arena.html")
+
+@app.get("/profile")
+def profile():
+    return FileResponse("static/profile.html")
+
+
+@app.get("/profile-stats/{user_id}")
+def profile_stats(user_id:int):
+
+    conn = psycopg2.connect(**DB_CONFIG)
+    cursor = conn.cursor()
+
+
+    # total matches
+    cursor.execute("""
+        SELECT COUNT(*)
+        FROM submissions
+        WHERE user_id=%s
+        AND verdict!='Pending'
+    """,(user_id,))
+
+    total = cursor.fetchone()[0]
+
+
+    # wins
+    cursor.execute("""
+        SELECT COUNT(*)
+        FROM submissions
+        WHERE user_id=%s
+        AND verdict='Accepted'
+    """,(user_id,))
+
+    wins = cursor.fetchone()[0]
+
+
+    losses = total - wins
+
+
+    winrate = 0
+
+    if total>0:
+        winrate = round((wins/total)*100,2)
+
+
+
+    # recent matches
+
+    cursor.execute("""
+        SELECT 
+        p.title,
+        s.verdict,
+        s.rating_delta
+
+        FROM submissions s
+
+        JOIN problems p
+        ON s.problem_id=p.id
+
+        WHERE s.user_id=%s
+
+        AND s.verdict!='Pending'
+
+        ORDER BY s.id DESC
+
+        LIMIT 5
+
+    """,(user_id,))
+
+
+    matches = cursor.fetchall()
+
+
+    cursor.close()
+    conn.close()
+
+
+    return {
+
+        "total":total,
+
+        "wins":wins,
+
+        "losses":losses,
+
+        "winrate":winrate,
+
+        "matches":[
+            {
+            "problem":m[0],
+            "verdict":m[1],
+            "delta":m[2]
+            }
+
+            for m in matches
+        ]
+
+    }
+
+@app.get("/leaderboard")
+def leaderboard_page():
+    return FileResponse("static/leaderboard.html")
 
 @app.post("/sync-problems")
 def sync_codeforces_problems():
@@ -349,11 +618,16 @@ def register_user(username: str, password: str, cf_handle: str):
     cursor = conn.cursor()
     cursor.execute("""
         INSERT INTO users (username, password_hash, cf_handle, current_rating, peak_rating) 
-        VALUES (%s, %s, %s, 800.0, 800.0)
+        VALUES (%s, %s, %s, 800.0, 800.0) RETURNING id
     """, (username, hashed, cf_handle))
+    user_id=cursor.fetchone()[0]
+    cursor.close()
     conn.commit()
     conn.close()
-    return {"message": "User registered successfully"}
+    return {
+"user_id":user_id,
+"message":"Registered"
+}
 
 @app.post("/login")
 def login(username: str, password: str):

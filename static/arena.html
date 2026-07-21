@@ -4,26 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DSA Arena | Competitive Practice</title>
-    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
 
     <nav class="navbar">
         <h1>DSA ARENA</h1>
         <div class="nav-links">
-            <a href="/play">Home</a>
-            <a href="#">Contests</a>
-            <a href="#">Rankings</a>
-        </div>
+            <a href="/arena">Home</a>
+            <a href="/contests">Contests</a>
+            <a href="/leaderboard">Rankings</a>
+            <a href="/profile">Profile</a>
+        
+
+        <span>
+Welcome, <b id="profUsername">User</b>
+</span>
+</div>
     </nav>
 
     <main class="container">
         <aside class="sidebar">
             <h3>Matchmaking</h3>
-            <div class="form-group">
-                <label>User ID</label>
-                <input type="number" id="userId" value="1">
-            </div>
+          
             <div class="form-group">
                 <label>Codeforces Handle</label>
                 <input type="text" id="cfHandle" placeholder="e.g. tourist">
@@ -59,7 +62,7 @@
             <div id="browserArea" class="view-panel" style="display: none;">
                 <h2>Chill Mode Browser</h2>
                 <div class="table-container">
-                    <table class="cp-table">
+                    <table class="cp-table history-table">
                         <thead>
                             <tr><th>Problem</th><th>Difficulty</th><th>Time</th><th>Action</th></tr>
                         </thead>
@@ -70,7 +73,7 @@
 
             <div id="matchArea" class="view-panel" style="display: none;">
                 <h2 style="color: #d93025;">🔴 Live Match</h2>
-                <table class="cp-table">
+                <table class="cp-table history-table">
                     <tr><th>Problem</th><td><a id="ui-prob-link" class="problem-link" target="_blank">Loading...</a></td></tr>
                     <tr><th>Difficulty</th><td id="ui-diff">--</td></tr>
                     <tr><th>Time Remaining</th><td id="ui-time" style="font-weight: bold;">--:--</td></tr>
@@ -84,7 +87,7 @@
 
             <div id="resultArea" class="view-panel" style="display: none;">
                 <h2>Match Complete</h2>
-                <table class="cp-table">
+                <table class="cp-table history-table">
                     <tr><th>Verdict</th><td id="res-verdict">--</td></tr>
                     <tr><th>Time Taken</th><td id="res-time">--</td></tr>
                     <tr><th>Rating Change</th><td id="res-delta">--</td></tr>
@@ -94,6 +97,6 @@
             </div>
         </section>
     </main>
-    <script src="/static/script.js"></script>
+    <script src="/js/script.js"></script>
 </body>
 </html>
