@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from typing import Optional
-from datetime import datetime, timedelta
+from datetime import date, timedelta
 import psycopg2
 import requests
 import random
@@ -535,6 +535,8 @@ def submit_match(match_id: int, gave_up: bool = False, cf_handle: Optional[str] 
             WHERE s.id = %s AND s.verdict = 'Pending';
         """, (match_id,))
         match = cursor.fetchone()
+
+    
         
         if not match:
             raise HTTPException(status_code=404, detail="Match not found.")
@@ -588,6 +590,11 @@ def submit_match(match_id: int, gave_up: bool = False, cf_handle: Optional[str] 
                 peak_rating = GREATEST(COALESCE(peak_rating, 0), %s)
             WHERE id = %s
         """, (new_rating, new_rating, match[0]))
+
+        cursor.execute("""
+        INSERT INTO rating_history(user_id, rating)
+        VALUES(%s,%s)
+    """, (match[0], new_rating))
         
         conn.commit()
         cursor.close()
@@ -639,3 +646,89 @@ def login(username: str, password: str):
     if user and user[1] and bcrypt.checkpw(password.encode('utf-8'), user[1].encode('utf-8')):
         return {"user_id": user[0], "message": "Login successful"}
     raise HTTPException(status_code=401, detail="Invalid username or password")
+
+
+@app.get("/rating-history/{user_id}")
+def rating_history(user_id: int):
+
+    conn = psycopg2.connect(**DB_CONFIG)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT
+        rating,
+        created_at
+        FROM rating_history
+        WHERE user_id=%s
+        ORDER BY created_at
+    """,(user_id,))
+
+    rows = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return [
+        {
+            "rating": float(r[0]),
+             "month": r[1].strftime("%b"),
+            "date": r[1].isoformat()
+        }
+        for r in rows
+    ]
+
+@app.get("/heatmap/{user_id}")
+def heatmap(user_id:int):
+
+    conn = psycopg2.connect(**DB_CONFIG)
+    cursor = conn.cursor()
+
+
+    cursor.execute("""
+        SELECT 
+            TO_CHAR(submitted_at, 'YYYY-MM-DD'),
+            COUNT(*)
+        FROM submissions
+        WHERE user_id = %s
+        GROUP BY TO_CHAR(submitted_at, 'YYYY-MM-DD')
+        ORDER BY 1 ASC
+    """, (user_id,))
+
+
+    rows = cursor.fetchall()
+
+
+    cursor.close()
+    conn.close()
+
+
+    solved={row[0]: row[1] for row in rows}
+
+
+    for day,count in rows:
+        solved[str(day)] = count
+
+
+
+    today=date.today()
+
+    start=today-timedelta(days=364)
+
+
+    result=[]
+
+
+    for i in range(365):
+
+        d=start+timedelta(days=i)
+        d_str = d.strftime("%Y-%m-%d")
+        result.append({
+
+            "date":d_str,
+
+            "count":solved.get(d_str,0)
+
+        })
+
+
+    return result

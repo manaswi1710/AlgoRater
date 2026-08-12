@@ -33,7 +33,7 @@
 
 
 <div class="container">
-
+<div class="profile-wrapper">
 
 <div class="profile-card">
 
@@ -91,12 +91,14 @@ Loading...
 
 </div>
 
-<h2>📊 Match Statistics</h2>
+<h2> Match Statistics</h2>
 
 <div class="profile-info">
 <span>Total Matches</span>
 <span id="matches"></span>
 </div>
+
+
 
 
 <div class="profile-info">
@@ -129,14 +131,75 @@ Loading...
 
 </table>
 
+<h2> Rating Progress</h2>
+
+<canvas id="ratingChart" height="120"></canvas>
+
+<h2>Activity Heat Map</h2>
 
 
+<div class="heatmap-wrapper">
+
+<div class="month-labels">
+    <span>Sep</span>
+    <span>Oct</span>
+    <span>Nov</span>
+    <span>Dec</span>
+    <span>Jan</span>
+    <span>Feb</span>
+    <span>Mar</span>
+    <span>Apr</span>
+    <span>May</span>
+    <span>Jun</span>
+    <span>Jul</span>
+    <span>Aug</span>
 </div>
 
 
+    <div class="heatmap-area">
+
+
+        <div class="weekday-labels">
+
+            <span></span>
+            <span>Mon</span>
+            <span></span>
+            <span>Wed</span>
+            <span></span>
+            <span>Fri</span>
+            <span></span>
+
+        </div>
+
+
+        <div id="heatmap" class="heatmap-grid"></div>
+
+
+    </div>
+
+
+    <div class="heatmap-legend">
+
+        <span>Less</span>
+
+        <div class="legend-box"></div>
+        <div class="legend-box level1"></div>
+        <div class="legend-box level2"></div>
+        <div class="legend-box level3"></div>
+        <div class="legend-box level4"></div>
+
+        <span>More</span>
+
+    </div>
+
+
+</div>
 </div>
 
+</div>
+</div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script src="/js/profile.js"></script>
 
